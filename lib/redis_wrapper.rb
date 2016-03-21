@@ -4,7 +4,7 @@ Bundler.require
 require "rediscluster"
 
 module RedisWrapper
-	# Backward compability with redis-rb
+  # Backward compability with redis-rb
   module RedisClusterFix
     class RedisClient
       def reconnect
@@ -20,20 +20,20 @@ module RedisWrapper
     end
   end
 
-	class Wrapper
-	  attr_accessor :redis, :is_cluster, :cluster_nodes
-	  def initialize(options = {})
-	    if options[:is_redis_cluster] == true
-	      options[:redis_cluster_nodes].each{|x| x.symbolize_keys!}
-	      cluster = RedisCluster.new(options[:redis_cluster_nodes])
-	      cluster.extend RedisClusterFix
-	      @is_cluster = true
-	      @cluster_nodes = options[:redis_cluster_nodes]
-	      @redis = cluster
-	    else
-	    	@is_cluster = false
-	      @redis = Redis.new(options)
-	    end
-	  end
-	end
+  class Wrapper
+    attr_accessor :redis, :is_cluster, :cluster_nodes
+    def initialize(options = {})
+      if options[:is_redis_cluster] == true
+        options[:redis_cluster_nodes].each{|x| x.symbolize_keys!}
+        cluster = RedisCluster.new(options[:redis_cluster_nodes])
+        cluster.extend RedisClusterFix
+        @is_cluster = true
+        @cluster_nodes = options[:redis_cluster_nodes]
+        @redis = cluster
+      else
+        @is_cluster = false
+        @redis = Redis.new(options)
+      end
+    end
+  end
 end
