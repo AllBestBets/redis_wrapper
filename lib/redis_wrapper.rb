@@ -16,7 +16,7 @@ module RedisWrapper
     end
     
     def client
-      RedisClient.new
+      @client ||= RedisClient.new
     end
   end
 
