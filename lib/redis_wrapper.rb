@@ -4,14 +4,20 @@ Bundler.require
 require "rediscluster"
 
 module RedisWrapper
-  # Backward compability with redis-rb
+
+  module ConnectionTableFix
+    attr_accessor :pid
+  end
+
   module RedisClusterFix
+    attr_accessor :connections
+
+    # Backward compability with redis-rb
     class RedisClient
+      attr_accessor :cluster
+
       def reconnect
-        # reconnect use in /config/unicorn.rb
-        # after_fork do |server, worker|
-        #   Redis.current.client.reconnect
-        # TODO: need to implement this with RedisCluster ? 
+        @cluster.connections.pid = Process.pid
       end
     end
     
@@ -27,9 +33,12 @@ module RedisWrapper
         options[:redis_cluster_nodes].each{|x| x.symbolize_keys!}
         cluster = RedisCluster.new(options[:redis_cluster_nodes])
         cluster.extend RedisClusterFix
+        cluster.connections.extend ConnectionTableFix
+        
         @is_cluster = true
         @cluster_nodes = options[:redis_cluster_nodes]
         @redis = cluster
+        @redis.client.cluster = cluster;
       else
         @is_cluster = false
         @redis = Redis.new(options)
