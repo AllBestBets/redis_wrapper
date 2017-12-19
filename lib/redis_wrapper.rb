@@ -1,7 +1,7 @@
 require 'redis_wrapper/version'
 require 'bundler'
 Bundler.require
-require 'rediscluster'
+require 'redis_cluster'
 
 module RedisWrapper
 
