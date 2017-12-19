@@ -1,7 +1,7 @@
-require "redis_wrapper/version"
-require "bundler"
+require 'redis_wrapper/version'
+require 'bundler'
 Bundler.require
-require "rediscluster"
+require 'rediscluster'
 
 module RedisWrapper
 
@@ -17,10 +17,11 @@ module RedisWrapper
       attr_accessor :cluster
 
       def reconnect
-        @cluster.connections.pid = Process.pid
+        # @cluster.connections.pid = Process.pid
+        @cluster.reconnect
       end
     end
-    
+
     def client
       @client ||= RedisClient.new
     end
@@ -28,17 +29,20 @@ module RedisWrapper
 
   class Wrapper
     attr_accessor :redis, :is_cluster, :cluster_nodes
+
     def initialize(options = {})
-      if options[:is_redis_cluster] == true
-        options[:redis_cluster_nodes].each{|x| x.symbolize_keys!}
+
+      if options[:is_redis_cluster]
+        options[:redis_cluster_nodes].each {|x| x.symbolize_keys!}
         cluster = RedisCluster.new(options[:redis_cluster_nodes])
         cluster.extend RedisClusterFix
         cluster.connections.extend ConnectionTableFix
-        
+
         @is_cluster = true
         @cluster_nodes = options[:redis_cluster_nodes]
         @redis = cluster
-        @redis.client.cluster = cluster;
+        @redis.client.cluster = cluster
+
       else
         @is_cluster = false
         @redis = Redis.new(options)
